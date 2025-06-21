@@ -33,6 +33,7 @@ async function handleSubmit(event) {
   hideLoadMoreButton();
 
   query = input.value.trim();
+  page = 1;
 
   if (!query) {
     iziToast.warning({
@@ -45,11 +46,10 @@ async function handleSubmit(event) {
   try {
     const data = await getImagesByQuery(query, page);
     const { hits, totalHits } = data;
-    const per_page = 15;
 
     createGallery(hits);
 
-    if (page >= Math.ceil(totalHits / per_page)) {
+    if (page >= getTotalPages(totalHits / per_page)) {
       hideLoadMoreButton();
     } else {
       showLoadMoreButton();
