@@ -14,9 +14,11 @@ import 'izitoast/dist/css/iziToast.min.css';
 const form = document.querySelector('.form');
 const input = document.querySelector('input[name="search-text"]');
 const loadMoreBtn = document.querySelector('.load-more-btn');
+
 let query = '';
 let page = 1;
 const per_page = 15;
+let totalPages = 0;
 
 function getTotalPages(totalHits, per_page) {
   return Math.ceil(totalHits / per_page);
@@ -28,9 +30,6 @@ hideLoadMoreButton();
 
 async function handleSubmit(event) {
   event.preventDefault();
-  clearGallery();
-  showLoader();
-  hideLoadMoreButton();
 
   query = input.value.trim();
   page = 1;
@@ -39,17 +38,21 @@ async function handleSubmit(event) {
     iziToast.warning({
       message: 'Please enter a search query',
     });
-    hideLoader();
     return;
   }
+
+  clearGallery();
+  showLoader();
+  hideLoadMoreButton();
 
   try {
     const data = await getImagesByQuery(query, page);
     const { hits, totalHits } = data;
 
+    totalPages = getTotalPages(totalHits, per_page);
     createGallery(hits);
 
-    if (page >= getTotalPages(totalHits / per_page)) {
+    if (page >= totalPages) {
       hideLoadMoreButton();
     } else {
       showLoadMoreButton();
@@ -81,7 +84,7 @@ loadMoreBtn.addEventListener('click', async () => {
       });
     }
 
-    if (page >= getTotalPages(data.totalHits, per_page)) {
+    if (page >= totalPages) {
       hideLoadMoreButton();
       iziToast.info({
         title: 'Info',
